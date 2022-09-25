@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "android", "web"],
+  "ios": {
+    "modules": ["ExpoWebexCallingModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.webexcalling.ExpoWebexCallingModule"]
+  }
+}

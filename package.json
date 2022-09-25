@@ -1,0 +1,39 @@
+{
+  "name": "expo-webex-calling",
+  "version": "0.1.0",
+  "description": "Expo Webex SDK with Calling functionality",
+  "main": "build/ExpoWebexCalling.js",
+  "types": "build/ExpoWebexCalling.d.ts",
+  "scripts": {
+    "build": "expo-module build",
+    "clean": "expo-module clean",
+    "lint": "expo-module lint",
+    "test": "expo-module test",
+    "prepare": "expo-module prepare",
+    "prepublishOnly": "expo-module prepublishOnly",
+    "expo-module": "expo-module"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "expo-webex-calling",
+    "ExpoWebexCalling"
+  ],
+  "repository": "https://github.com/daniel-zarinski/expo-webex-calling",
+  "bugs": {
+    "url": "https://github.com/daniel-zarinski/expo-webex-calling/issues"
+  },
+  "author": "Daniel Zarinski <daniel.zarinski@hotmail.com> (https://github.com/daniel-zarinski)",
+  "license": "MIT",
+  "homepage": "https://github.com/daniel-zarinski/expo-webex-calling#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "expo-module-scripts": "^2.1.1",
+    "expo-modules-core": "^0.11.4"
+  },
+  "peerDependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}
