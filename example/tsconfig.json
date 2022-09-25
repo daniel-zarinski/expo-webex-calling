@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-webex-calling": ["../src/ExpoWebexCalling"],
+      "expo-webex-calling/*": ["../src/*"]
+    }
+  }
+}
