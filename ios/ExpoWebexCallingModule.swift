@@ -20,7 +20,7 @@ public class ExpoWebexCallingModule: Module {
 
     // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
     Function("hello") {
-      return "Hello world! 👋"
+      return "Hello world! 👋👋"
     }
 
     // Defines a JavaScript function that always returns a Promise and whose native code
@@ -30,6 +30,12 @@ public class ExpoWebexCallingModule: Module {
       self.sendEvent("onChange", [
         "value": value
       ])
+    }
+    
+    AsyncFunction("asyncFunction") { (message: String, promise: Promise) in
+      DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+        promise.resolve(message)
+      }
     }
 
     // Enables the module to be used as a view manager. The view manager definition is built from
