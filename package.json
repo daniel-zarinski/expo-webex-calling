@@ -28,6 +28,7 @@
   "homepage": "https://github.com/daniel-zarinski/expo-webex-calling#readme",
   "dependencies": {},
   "devDependencies": {
+    "@types/react-native": "^0.70.4",
     "expo-module-scripts": "^2.1.1",
     "expo-modules-core": "^0.11.4"
   },

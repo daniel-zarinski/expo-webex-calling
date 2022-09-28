@@ -20,6 +20,18 @@ export function hello(): string {
   return ExpoWebexCalling.hello();
 }
 
+export function initWebex(): Promise<void> {
+  return ExpoWebexCalling.initWebex();
+}
+
+export function answerCall(): Promise<void> {
+  return ExpoWebexCalling.answerCall();
+}
+
+export function authenticate(token: string): Promise<boolean> {
+  return ExpoWebexCalling.authenticate(token);
+}
+
 export async function setValueAsync(value: string) {
   return await ExpoWebexCalling.setValueAsync(value);
 }
@@ -31,10 +43,39 @@ const emitter = new EventEmitter(
   NativeModulesProxy.ExpoWebexCalling ?? ExpoWebexCalling
 );
 
-export function addChangeListener(
-  listener: (event: ChangeEventPayload) => void
+export enum EventTypes {
+  onLogin = "onLogin",
+  onCallIncoming = "onCallIncoming",
+  onCallParticipantsChange = "onCallParticipantsChange",
+  OnCallStatusChange = "OnCallStatusChange",
+}
+
+export enum CallStatus {
+  Disconnected = "disconnected",
+  ParticipantsChaned = "participants-changed",
+  Connected = "connected",
+}
+
+export function onLogin(
+  listener: (success: { isLoggedIn: boolean }) => void
 ): Subscription {
-  return emitter.addListener<ChangeEventPayload>("onChange", listener);
+  return emitter.addListener(EventTypes.onLogin, listener);
+}
+
+export function onIncomingCall(listener: (data: any) => void): Subscription {
+  return emitter.addListener(EventTypes.onCallIncoming, listener);
+}
+
+export function onStatusChange(
+  listener: (data: { status: CallStatus }) => void
+): Subscription {
+  return emitter.addListener(EventTypes.OnCallStatusChange, listener);
+}
+
+export function onCallParticipantChange(
+  listener: (data: any) => void
+): Subscription {
+  return emitter.addListener(EventTypes.onCallParticipantsChange, listener);
 }
 
 export { ExpoWebexCallingView, ExpoWebexCallingViewProps, ChangeEventPayload };
