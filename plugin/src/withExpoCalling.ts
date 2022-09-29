@@ -35,6 +35,7 @@ const withAndroidCameraGradle: ConfigPlugin = (config) => {
         "Cannot add camera maven gradle because the build.gradle is not groovy"
       );
     }
+
     return config;
   });
 };
@@ -88,12 +89,6 @@ const withExpoCalling: ConfigPlugin<
     microphonePermission?: string;
   } | void
 > = (config, { cameraPermission, microphonePermission } = {}) => {
-  console.debug(
-    "withExpoCalling",
-    config,
-    cameraPermission,
-    microphonePermission
-  );
   config = withInfoPlist(config, (config) => {
     config.modResults.NSCameraUsageDescription =
       cameraPermission ||

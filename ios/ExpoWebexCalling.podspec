@@ -18,8 +18,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
 
-  s.dependency 'WebexSDK'
-  # s.dependency 'WebexBroadcastExtensionKit'
+  s.dependency 'WebexSDK', '> 3'
 
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {

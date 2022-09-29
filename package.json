@@ -1,6 +1,6 @@
 {
   "name": "expo-webex-calling",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Expo Webex SDK with Calling functionality",
   "main": "build/ExpoWebexCalling.js",
   "types": "build/ExpoWebexCalling.d.ts",
