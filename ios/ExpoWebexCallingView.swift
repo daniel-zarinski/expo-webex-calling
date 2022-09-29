@@ -1,11 +1,21 @@
 import ExpoModulesCore
 import UIKit
 import WebexSDK
+import AVFoundation
 
-class ExpoWebexCallingView: ExpoView {
+class ExpoWebexCallingView: ExpoView, MultiStreamObserver {
     public var webex: Webex!
     public var activeCall: Call? = nil
     public var name: String?
+    
+    /// onAuxStreamChanged represent a call back when a existing auxiliary stream status changed.
+    var onAuxStreamChanged: ((AuxStreamChangeEvent) -> Void)?
+    
+    /// onAuxStreamAvailable represent the call back when current call have a new auxiliary stream.
+    var onAuxStreamAvailable: (() -> MediaRenderView?)?
+    
+    /// onAuxStreamUnavailable represent the call back when current call have an existing auxiliary stream being unavailable.
+    var onAuxStreamUnavailable: (() -> MediaRenderView?)?
     
     required init?(coder: NSCoder) {
         fatalError("init with coder not implemented.")
@@ -54,7 +64,7 @@ class ExpoWebexCallingView: ExpoView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .preferredFont(forTextStyle: .largeTitle)
         label.accessibilityIdentifier = "callLabel"
-        label.textColor = .white
+        label.textColor = .black
         label.textAlignment = .center
         label.text = "No video"
         label.isHidden = false
@@ -119,8 +129,171 @@ extension ExpoWebexCallingView {
         call.videoRenderViews = (self.selfVideoView, self.remoteVideoView)
         self.selfVideoView.alpha = 1
         self.callingLabel.text = "active call"
+        self.handleWebexCallEvents()
+    }
+    
+    func disconnectFromCall() {
+        guard let call = self.activeCall else {
+            fatalError("disconnectFromCall: Call does not exist..")
+        }
+        
     }
 }
+
+
+extension ExpoWebexCallingView {
+    private func syncInternalStateWithCall() {
+        guard let call = self.activeCall else {
+            fatalError("Unable to update internal call state. Active call was not found.")
+        }
+        
+        //    CallManager.renderMode = call.remoteVideoRenderMode
+        //    CallManager.compositedLayout = call.compositedVideoLayout ?? .single
+        //    CallManager.isLocalAudioMuted = !call.sendingAudio
+        //    CallManager.isLocalVideoMuted = !call.sendingVideo
+        //    CallManager.isLocalScreenSharing = call.sendingScreenShare
+        //    CallManager.isReceivingAudio = call.receivingAudio
+        //    CallManager.isReceivingVideo = call.receivingVideo
+        //    CallManager.isReceivingScreenshare = call.receivingScreenShare
+        //    CallManager.isFrontCamera = call.facingMode == .user ? true : false
+    }
+    
+    func handleWebexCallEvents() {
+        guard let call = self.activeCall else {
+            fatalError("Unable to handle webex call events. Active call was not found.")
+        }
+        
+        print("dLog: Call Status: \(call.status)")
+        
+        call.onConnected = {
+            print("dLog: CallViewController:call.onConnected called")
+            
+            self.syncInternalStateWithCall()
+            call.videoRenderViews = (self.selfVideoView, self.remoteVideoView)
+        }
+        
+        
+        call.onMediaChanged = { [weak self] mediaEvents in
+            print("dLog: onMediaChanged Call, events: \(mediaEvents)")
+            
+            if let self = self {
+                self.syncInternalStateWithCall()
+                
+                switch mediaEvents {
+                    /* Local/Remote video rendering view size has changed */
+                case .localVideoViewSize, .remoteVideoViewSize, .remoteScreenShareViewSize, .localScreenShareViewSize:
+                    break
+                    
+                    /* This might be triggered when the remote party muted or unmuted the audio. */
+                case .remoteSendingAudio(let isSending):
+                    print("dLog: Remote is sending Audio- \(isSending)")
+                    
+                    /* This might be triggered when the remote party muted or unmuted the video. */
+                case .remoteSendingVideo(let isSending):
+                    print("dLog: call onMediaChanged: remoteSendingVideo isSending: \(isSending)")
+                    self.remoteVideoView.alpha = isSending ? 1 : 0
+                    
+                    if isSending {
+                        call.videoRenderViews = (self.selfVideoView, self.remoteVideoView)
+                    }
+                    break
+                    
+                    /* This might be triggered when the local party muted or unmuted the audio. */
+                case .sendingAudio(let isSending):
+                    print("dLog: CallViewController:call.sendingAudio \(isSending)")
+                    //          CallManager.isLocalAudioMuted = !isSending
+                    break
+                    
+                    /* This might be triggered when the local party muted or unmuted the video. */
+                case .sendingVideo(let isSending):
+                    print("dLog: call.sendingVideo \(isSending) @!@!@!@!@!@!@!@!@!@!@!@!")
+                    
+                    //          CallManager.isLocalVideoMuted = !isSending
+                    if isSending {
+                        call.videoRenderViews = (self.selfVideoView, self.remoteVideoView)
+                        self.selfVideoView.alpha = 1
+                    } else {
+                        self.selfVideoView.alpha = 0
+                    }
+                    break
+                case .receivingAudio(let isReceiving):
+                    print("Remote is receiving Audio- \(isReceiving)")
+                    
+                case .receivingVideo(let isSending):
+                    print("dLog: CallViewController: .receivingVideo \(isSending)")
+                    if isSending {
+                        self.remoteVideoView.alpha = 1
+                    } else {
+                        self.remoteVideoView.alpha = 0
+                    }
+                    
+                    if isSending {
+                        call.videoRenderViews = (self.selfVideoView, self.remoteVideoView)
+                    }
+                    break
+                    
+                    /* Camera FacingMode on local device has switched. */
+                case .cameraSwitched:
+                    //          CallManager.isFrontCamera.toggle()
+                    break
+                    
+                    
+                    /* Whether Screen share is blocked by local*/
+                case .receivingScreenShare(let isReceiving):
+                    print("dLog: receiving screen share: \(isReceiving)")
+                    
+                    /* Whether Remote began to send Screen share */
+                case .remoteSendingScreenShare(let remoteSending):
+                    print("dLog: remoteSendingScreenShare: \(remoteSending)")
+                    
+                    
+                    /* Whether local began to send Screen share */
+                case .sendingScreenShare(let startedSending):
+                    print("dLog sendingScreenShare \(startedSending)")
+                    
+                    /* This might be triggered when the remote video's speaker has changed.
+                     */
+                case .activeSpeakerChangedEvent(let from, let to):
+                    print("Active speaker changed from \(String(describing: from)) to \(String(describing: to))")
+                    
+                default:
+                    break
+                }
+            }
+        }
+        
+        call.onFailed = { reason in
+            print("dLog: Call Failed!")
+            // self.player.stop()
+        }
+        
+        call.onWaiting = { reason in
+            print("dLog: CallViewController:call.onWaiting \(reason)")
+        }
+        
+        call.onInfoChanged = {
+            print("dLog: CallViewController:call.onInfoChanged isOnHold: \(call.isOnHold)")
+            
+            call.videoRenderViews?.local.isHidden = call.isOnHold
+            call.videoRenderViews?.remote.isHidden = call.isOnHold
+            call.screenShareRenderView?.isHidden = call.isOnHold
+            self.selfVideoView.isHidden = call.isOnHold
+            self.remoteVideoView.isHidden = call.isOnHold
+        }
+        
+        /* set the observer of this call to get multi stream event */
+        call.multiStreamObserver = self
+        
+        
+        /* Callback when an existing multi stream media being unavailable. The SDK will close the last auxiliary stream if you don't return the specified view*/
+        self.onAuxStreamUnavailable = {
+            return nil
+        }
+        
+    }
+}
+
+
 
 
 

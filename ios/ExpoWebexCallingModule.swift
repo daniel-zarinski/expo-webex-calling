@@ -161,6 +161,7 @@ public class ExpoWebexCallingModule: Module {
                     }
                     
                     let mediaOption = self.getMediaOption(isModerator: false, pin: nil)
+                    self.callingViewRef?.connectToCall()
                     call.answer(option: mediaOption, completionHandler: { error in
                         if error == nil {
                             self.updatePhoneSettings()

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 
 export default function App() {
+  const [isWebexInitialized, setIsWebexInitialized] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isCallIncoming, setIsCallIncoming] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,10 +55,11 @@ export default function App() {
       <Text>{isCallActive ? "Call Active" : ""}</Text>
 
       <Button
-        title="Initialize"
+        title={isWebexInitialized ? "Initialized" : "Initialize"}
         onPress={async () => {
-          const data = await ExpoWebexCalling.initWebex();
-          console.log({ data });
+          const initData = await ExpoWebexCalling.initWebex();
+          console.log({ initData });
+          setIsWebexInitialized(true);
         }}
       />
 
@@ -87,9 +89,8 @@ export default function App() {
         <ExpoWebexCalling.ExpoWebexCallingView
           name="incoming"
           style={{
-            width: 300,
-            height: 300,
-            backgroundColor: "red",
+            width: 400,
+            height: 500,
           }}
         />
       )}
