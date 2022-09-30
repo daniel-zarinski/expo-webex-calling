@@ -100,12 +100,11 @@ const withExpoCalling: ConfigPlugin<
       config.modResults.NSMicrophoneUsageDescription ||
       MICROPHONE_USAGE;
 
-    if (!config.ios) {
-      config.ios = {};
-    }
-    if (!config.ios.infoPlist) {
-      config.ios.infoPlist = {};
-    }
+    config.modResults.GroupIdentifier =
+      config.modResults.GroupIdentifier || `group.$(PRODUCT_BUNDLE_IDENTIFIER)`;
+
+    if (!config.ios) config.ios = {};
+    if (!config.ios.infoPlist) config.ios.infoPlist = {};
 
     config.ios.infoPlist["NSCameraUsageDescription"] =
       cameraPermission ||
@@ -126,7 +125,6 @@ const withExpoCalling: ConfigPlugin<
 
   config = AndroidConfig.Permissions.withPermissions(config, [
     "android.permission.CAMERA",
-    // Optional
     "android.permission.RECORD_AUDIO",
   ]);
 
